@@ -1,0 +1,34 @@
+// Define a function to generate the error matrix and calculate accuracy metrics
+var generateErrorMatrix = function(classifiedImage, referenceData, classProperty, classificationProperty, scale) {
+  // Sample the classified image
+  var sampledData = classifiedImage.sampleRegions({
+    collection: referenceData,
+    properties: [classProperty],
+    scale: scale
+  });
+
+  // Create the error matrix
+  var errorMatrix = sampledData.errorMatrix(classProperty, classificationProperty);
+
+  // Calculate overall accuracy
+  var overallAccuracy = errorMatrix.accuracy();
+
+  // Calculate user accuracy and producer accuracy
+  var userAccuracy = errorMatrix.consumersAccuracy();
+  var producerAccuracy = errorMatrix.producersAccuracy();
+
+  // Calculate Kappa statistic
+  var kappa = errorMatrix.kappa();
+
+  // Return the error matrix and accuracy metrics
+  return {
+    errorMatrix: errorMatrix,
+    overallAccuracy: overallAccuracy,
+    userAccuracy: userAccuracy,
+    producerAccuracy: producerAccuracy,
+    kappa: kappa
+  };
+};
+
+// Export the function for use in other scripts
+exports.generateErrorMatrix = generateErrorMatrix;

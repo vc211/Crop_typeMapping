@@ -1,0 +1,56 @@
+// Function to calculate all indices
+exports.calculateIndices = function(image){
+  var scaled = image.select(['B2','B3','B4','B5','B6','B8','B11','B12']).divide(10000)
+    .rename(['BLUE','GREEN','RED','RE1','RE2','NIR','SWIR1','SWIR2']);
+  var ndDefs = [
+    {name: 'NDVI', bands: ['NIR','RED']},
+    {name: 'GNDVI', bands: ['NIR','GREEN']},   // GNDVI (Green Normalized Difference Vegetation Index)
+    {name: 'NDRE', bands: ['NIR','RE1']},     // NDRE (Normalized Difference Red Edge Vegetation Index)
+    {name: 'NDMI', bands: ['NIR','SWIR1']},   // NDMI (Normalized Difference Moisture Index)
+    {name: 'LSWI', bands: ['NIR','SWIR2']}    // LSWI (Land Surface Water Inddex)
+  ];
+  var ndIndices = ndDefs.map(function(def) {
+    return scaled.normalizedDifference(def.bands).rename(def.name);
+  });
+  // EVI (Enhanced Vegetation Index)
+  var evi = scaled.expression(
+    '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+    {'NIR': scaled.select('NIR'), 'RED': scaled.select('RED'), 'BLUE': scaled.select('BLUE')}
+  ).rename('EVI');
+  // LAI (Leaf Area Index)
+  var lai = evi.multiply(3.618).subtract(0.118).rename('LAI');
+  // SAVI (Soil Adjusted Vegetation Index)
+  var savi = scaled.expression(
+    '((NIR - RED) / (NIR + RED + 0.5)) * 1.5',
+    {'NIR': scaled.select('NIR'), 'RED': scaled.select('RED')}
+  ).rename('SAVI');
+  // GLI (Green Leaf Index)
+  var gli = scaled.expression(
+    '((GREEN - RED) + (GREEN - BLUE)) / ((2 * GREEN) + RED + BLUE)',
+    {'GREEN': scaled.select('GREEN'), 'RED': scaled.select('RED'), 'BLUE': scaled.select('BLUE')}
+  ).rename('GLI');
+  // GCI (Green Chlorophyll Index)
+  var gci = scaled.expression('(NIR / GREEN) - 1', {'NIR': scaled.select('NIR'), 'GREEN': scaled.select('GREEN')}).rename('GCI');
+  // RECI (Red-Edge Chlorophyll Vegetation Index)
+  var reci = scaled.expression('(NIR / RE2) - 1', {'NIR': scaled.select('NIR'), 'RE2': scaled.select('RE2')}).rename('RECI');
+  // RGR (Red Green Ratio)
+  var rgr = scaled.expression('RED / GREEN', {'RED': scaled.select('RED'), 'GREEN': scaled.select('GREEN')}).rename('RGR');
+  // SIPI (Structure Insensitive Pigment Index)
+  var sipi = scaled.expression(
+    '(NIR - BLUE) / (NIR - RED)',
+    {'NIR': scaled.select('NIR'), 'BLUE': scaled.select('BLUE'), 'RED': scaled.select('RED')}
+  ).rename('SIPI');
+  // ARVI (Atmospherically Resistant Vegetation Index)
+  var arvi = scaled.expression(
+    '(NIR - 2 * RED + BLUE) / (NIR + 2 * RED + BLUE)',
+    {'NIR': scaled.select('NIR'), 'RED': scaled.select('RED'), 'BLUE': scaled.select('BLUE')}
+  ).rename('ARVI');
+  return image.addBands(ndIndices.concat([evi, lai, savi, gli, gci, reci, rgr, sipi, arvi]));
+}
+
+// Function to calculate and add an RVI band
+// PLEASE NOTE FOR THIS KEEP THE BANDS IN LINEAR FORMAT, NOT dB!
+exports.addRVI = function(image) {
+  return image.addBands((image.select['VH'].multiply(4)).divide(image.select['VH'].add(image.select['VV'])))
+              .rename('RVI')
+};
