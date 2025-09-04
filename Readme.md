@@ -1,4 +1,4 @@
-*	Polygon quality checks (#### **`polygon_cleaning.py`**). The following polygon quality checks are performed :-
+*	Polygon quality checks (**`polygon_cleaning.py`**). The following polygon quality checks are performed :-
 
 &nbsp;&nbsp; 1.	Validity check
 &nbsp;&nbsp; 2. Uniqueness check
@@ -8,6 +8,6 @@
 
 For running the code in command line/terminal - `python .\polygon_cleaning.py input_shapefile.shp output_shapefile.shp`
 *	Cleaned polygons are then to be uploaded as an asset in Google Earth Engine which will then be used as ground truth/ training and testing datasets.
-*	Run the code #### **`1_RFingestData_PCA.js`** to get a 15-day composite image including all bands of Sentinel 2 and VH band of Sentinel 1. Additionally, vegetation indices are added. The selection of indices to be added can be adjusted at line 244.
-*	Next, run ### **`2_hyperparameterTuning.js`** to get the classifier with number of trees and bagfraction as optimal for random forest algorithm. The parameters will be exported to a csv which can be used in the following code.
-*	Finally, ### **`3_classification_optimal.js**` is to be run to get the final classified image
+*	Run the code **`1_RFingestData_PCA.js`** to get a 15-day composite image including all bands of Sentinel 2 and VH band of Sentinel 1. Additionally, vegetation indices are added. The selection of indices to be added can be adjusted at line 244.
+*	Next, run **`2_hyperparameterTuning.js`** to get the classifier with number of trees and bagfraction as optimal for random forest algorithm. The parameters will be exported to a csv which can be used in the following code.
+*	Finally, **`3_classification_optimal.js**` is to be run to get the final classified image
